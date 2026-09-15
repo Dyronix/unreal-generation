@@ -1,6 +1,6 @@
 # unreal generation script
 
-Generates a set of helper `.bat` files into an Unreal Engine project folder, so
+Generates a set of helper scripts into an Unreal Engine project folder, so
 building, cooking, packaging and running the project are all one double-click.
 
 Verified against **Unreal Engine 5.8**. Expected to work on 5.3+.
@@ -30,7 +30,46 @@ directory name and warns that it did so.
 | `-p`, `--path` | Root directory of the Unreal Engine installation. Required. |
 | `--vs` | Visual Studio version to generate project files for: `auto` (default), `2022` or `2026`. `auto` lets Unreal Build Tool use the source code editor set in the editor preferences. |
 
-## Generated scripts
+## What you get
+
+```
+YourProject/
+    YourProject.uproject
+    Unreal Tools.bat        <- the only thing anyone needs to click
+    Scripts/
+        ... the scripts the menu runs
+```
+
+**`Unreal Tools.bat`** is a menu. Press a number, it does the thing, it tells
+you whether it worked. Designers and artists never need to go into `Scripts/`.
+
+```
+  EVERYDAY
+    1.  Open the editor
+    2.  Fix the project after pulling   (rebuilds C++ code)
+
+  TRYING THE GAME
+    3.  Play the game in a window
+    4.  Make a packaged build           (into Packaged\)
+
+  PROGRAMMERS
+    5.  Update the Visual Studio solution
+    6.  More...
+```
+
+"More" holds the standalone build, the content cook, the compiled-executable
+run, and clean.
+
+### For artists and designers
+
+You open the project by double-clicking `YourProject.uproject`, same as always.
+You only need `Unreal Tools.bat` in one situation: **you pulled, and now the
+editor refuses to open** and complains that modules are out of date. That is
+option **2**. Let it finish, then open the project normally.
+
+### Scripts
+
+Everything in `Scripts/` can also be run on its own if you prefer.
 
 | Script | What it does |
 | --- | --- |
@@ -46,11 +85,12 @@ directory name and warns that it did so.
 | `rootdir.bat` | Holds the engine path. Edit this to point at a different engine. |
 | `vars.bat` | Derives every other path. Sourced by all of the above. |
 
-To retarget an existing project at a different engine version, edit `UE5_DIR`
-in `rootdir.bat` — there is no need to re-run `setup.py`.
+Every script reports `[ OK ]` or `[FAIL]` when it finishes and waits for a
+keypress, so nothing disappears before you can read it. The menu sets
+`UE_TOOLS_NOPAUSE=1` to suppress that second pause when it is driving them.
 
-Every generated script reports a non-zero exit code and pauses on failure, so a
-broken build does not scroll past unnoticed.
+To retarget an existing project at a different engine version, edit `UE5_DIR`
+in `Scripts/rootdir.bat` — there is no need to re-run `setup.py`.
 
 ## Notes
 
@@ -58,3 +98,7 @@ broken build does not scroll past unnoticed.
 rather than calling `UnrealBuildTool.exe` directly. `Build.bat` resolves the
 .NET SDK bundled with the engine (UE 5.8 ships .NET 10), so the scripts work on
 machines that do not have a matching .NET runtime installed system-wide.
+
+Earlier versions wrote all the scripts loose in the project root. If you have
+those leftovers, `setup.py` lists them at the end of its run so you can delete
+them; it never deletes anything itself.
